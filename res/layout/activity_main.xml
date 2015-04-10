@@ -3,11 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-
-    <SurfaceView android:id="@+id/surfaceview"
-                 android:layout_height="fill_parent"
-                 android:layout_width="fill_parent"
-                                />
+    <FrameLayout android:id="@+id/framelayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+         
+         <SurfaceView
+             android:id="@+id/surfaceview"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent" />
+        
+    </FrameLayout>
+   
+    <Button 
+    android:id="@+id/count"
+         android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="50sp"
+    android:textColor="#ffffff"
+     android:background="#00000000"
+     android:visibility="gone"
+     android:layout_centerInParent="true"
+        />
     
     <Button   android:id="@+id/take_picture"
                  android:layout_height="wrap_content"
@@ -16,8 +33,7 @@
                  android:layout_marginBottom="20dp"
                  android:layout_alignParentBottom="true"
                  android:layout_centerInParent="true"
-                 
-                     
+                                   
                  />
 
     <ImageView
@@ -29,5 +45,9 @@
         android:layout_marginBottom="20dp"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="20dp"/>
+
+    
+
+
 
 </RelativeLayout>

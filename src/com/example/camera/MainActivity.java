@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-import android.R.layout;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -20,7 +19,9 @@ import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -28,6 +29,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
@@ -36,9 +38,29 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	Camera.Parameters parameters;
 	Button take_picture;
 	ImageView pic_pre;
+	TextView countdown;
+	int currentTime=10;
 	boolean isclicked = false;
 	String imagefilepath = "/sdcard/Pictures/";
-
+	private Handler timerUpdateHandler;
+	private boolean timerRunning=false;
+	private Runnable timerUpdateTask=new Runnable() {
+		public void run() {
+			if (currentTime>1) {
+				 currentTime--;  
+				    timerUpdateHandler.postDelayed(timerUpdateTask, 1000); 
+			}
+			else { 
+				camera.autoFocus(autofocus);      
+				camera.takePicture(null, null, jpeg);
+				currentTime=10;
+				timerRunning=false;
+				countdown.setVisibility(View.GONE);
+			}
+			countdown.setText(""+currentTime);
+		}
+		
+	};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,35 +76,53 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		take_picture = (Button) findViewById(R.id.take_picture);
 		take_picture.setOnClickListener(takePicture);
 		pic_pre = (ImageView) findViewById(R.id.pic_pre);
-		
+		countdown = (Button) this.findViewById(R.id.count);
+		pic_pre.setOnClickListener(prepicListener);
 		cameraView.setFocusable(true);
 		cameraView.setFocusableInTouchMode(true);
 		cameraView.setClickable(true);
 		cameraView.setOnClickListener(surfaceautofocus);
-
+		
+		
+		
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
 		switch (item.getItemId())// 得到被点击的item的itemId
 		{
-		case Menu.FIRST + 1: // 对应的ID就是在add方法中所设定的Id
-			setcolor(Camera.Parameters.EFFECT_NONE);
+		case R.id.mode: // 
+		case R.id.original:	setcolor(Camera.Parameters.EFFECT_NONE);
 			break;
-		case Menu.FIRST + 2:
+		case R.id.black_white:
 			setcolor(Camera.Parameters.EFFECT_MONO);
 			break;
-		case Menu.FIRST + 3:
+		case R.id.nagative:
 			setcolor(Camera.Parameters.EFFECT_NEGATIVE);
-			break;
-		case Menu.FIRST + 4:
+			break; 
+		case R.id.Sephia:
 			setcolor(Camera.Parameters.EFFECT_SEPIA);
 			break;
+			
+		case R.id.delay_take:
+			countdown.setVisibility(View.VISIBLE);
+			timerUpdateHandler = new Handler();
+			   if (!timerRunning)  
+			    {  
+			        timerRunning = true;  
+			        timerUpdateHandler.post(timerUpdateTask);  
+			    }
+			  
+			
+			break;
+		case R.id.exit:
+		finish();
+		break;
 		}
 		return true;
 	}
-
+  
 	private void setcolor(String string) {
 		// TODO Auto-generated method stub
 		parameters = camera.getParameters();
@@ -95,11 +135,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		// TODO Auto-generated method stub
 
 		// getMenuInflater().inflate(R.menu.options_menu, menu);
-		menu.add(Menu.NONE, Menu.FIRST + 1, 0, "原始");
-		menu.add(Menu.NONE, Menu.FIRST + 2, 0, "黑白");
-		menu.add(Menu.NONE, Menu.FIRST + 3, 0, "反光");
-		menu.add(Menu.NONE, Menu.FIRST + 4, 0, "Sephia");
-		return true;
+//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 1, 0, "原始");
+//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 2, 0, "黑白");
+//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 3, 0, "反光");
+//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 4, 0, "Sephia");
+//		menu.add(Menu.CATEGORY_CONTAINER, Menu.FIRST + 5, 0, "延拍");
+//		menu.add(Menu.NONE, Menu.FIRST + 6, 0, "退出");
+		MenuInflater inflater=new MenuInflater(getApplicationContext());
+		inflater.inflate(R.menu.menu, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	/**
@@ -190,21 +234,21 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			}
 		}
 	};
-    OnClickListener prepicListener=new OnClickListener() {
-		
+	OnClickListener prepicListener = new OnClickListener() {
+
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
-			String picpath=(String)v.getTag();
-			Intent intent=new Intent();
-		    intent.putExtra("picpath", picpath);
+			String picpath = (String) v.getTag();
+			Intent intent = new Intent();
+			intent.putExtra("picpath", picpath);
 			intent.setClass(MainActivity.this, Picture.class);
 			startActivity(intent);
 			finish();
-			
-			
+
 		}
 	};
+
 	public BitmapDrawable changeBitmapToDrawable(Bitmap rotateBitmap) {
 		// TODO Auto-generated method stub
 		int width = rotateBitmap.getWidth();
