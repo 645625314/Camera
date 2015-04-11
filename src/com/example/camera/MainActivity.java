@@ -5,14 +5,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.camera.ui.DrawCaptureRect;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
@@ -27,6 +34,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,33 +42,35 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	Camera camera;
+	Picture picture;
 	int mCurrentOrientation;
 	Camera.Parameters parameters;
 	Button take_picture;
 	ImageView pic_pre;
 	TextView countdown;
-	int currentTime=10;
+	int currentTime = 10;
 	boolean isclicked = false;
 	String imagefilepath = "/sdcard/Pictures/";
+	
 	private Handler timerUpdateHandler;
-	private boolean timerRunning=false;
-	private Runnable timerUpdateTask=new Runnable() {
+	private boolean timerRunning = false;
+	private Runnable timerUpdateTask = new Runnable() {
 		public void run() {
-			if (currentTime>1) {
-				 currentTime--;  
-				    timerUpdateHandler.postDelayed(timerUpdateTask, 1000); 
-			}
-			else { 
-				camera.autoFocus(autofocus);      
+			if (currentTime > 1) {
+				currentTime--;
+				timerUpdateHandler.postDelayed(timerUpdateTask, 1000);
+			} else {
+				camera.autoFocus(autofocus);
 				camera.takePicture(null, null, jpeg);
-				currentTime=10;
-				timerRunning=false;
+				currentTime = 10;
+				timerRunning = false;
 				countdown.setVisibility(View.GONE);
 			}
-			countdown.setText(""+currentTime);
+			countdown.setText("" + currentTime);
 		}
-		
+
 	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,79 +80,72 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		SurfaceView cameraView = (SurfaceView) this
 				.findViewById(R.id.surfaceview);
 		SurfaceHolder surfaceHolder = cameraView.getHolder(); // 用surfaceholder将SurfaceView和Camera联系起来
-		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		//surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		surfaceHolder.addCallback(this); // 告知SurfaceHolder用此activity作为其Callback的实现类
 		mCurrentOrientation = getResources().getConfiguration().orientation; // 得到当前手机屏幕显示方向
 		take_picture = (Button) findViewById(R.id.take_picture);
 		take_picture.setOnClickListener(takePicture);
 		pic_pre = (ImageView) findViewById(R.id.pic_pre);
 		countdown = (Button) this.findViewById(R.id.count);
+		
 		pic_pre.setOnClickListener(prepicListener);
 		cameraView.setFocusable(true);
 		cameraView.setFocusableInTouchMode(true);
 		cameraView.setClickable(true);
 		cameraView.setOnClickListener(surfaceautofocus);
 		
-		
-		
+
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
 		switch (item.getItemId())// 得到被点击的item的itemId
 		{
-		case R.id.mode: // 
-		case R.id.original:	setcolor(Camera.Parameters.EFFECT_NONE);
+
+		case R.id.original:
+			setcolor(Camera.Parameters.EFFECT_NONE);
 			break;
 		case R.id.black_white:
 			setcolor(Camera.Parameters.EFFECT_MONO);
 			break;
 		case R.id.nagative:
 			setcolor(Camera.Parameters.EFFECT_NEGATIVE);
-			break; 
+			break;
 		case R.id.Sephia:
 			setcolor(Camera.Parameters.EFFECT_SEPIA);
 			break;
-			
+
 		case R.id.delay_take:
 			countdown.setVisibility(View.VISIBLE);
 			timerUpdateHandler = new Handler();
-			   if (!timerRunning)  
-			    {  
-			        timerRunning = true;  
-			        timerUpdateHandler.post(timerUpdateTask);  
-			    }
-			  
-			
-			break;
+			if (!timerRunning) {
+				timerRunning = true;
+				timerUpdateHandler.post(timerUpdateTask);
+			}
+		
 		case R.id.exit:
-		finish();
-		break;
+			finish();
+			break;
 		}
 		return true;
 	}
-  
+
 	private void setcolor(String string) {
 		// TODO Auto-generated method stub
 		parameters = camera.getParameters();
 		parameters.setColorEffect(string);// 黑白效果
 		camera.setParameters(parameters);
 	}
-
+	
+   	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// TODO Auto-generated method stub
 
-		// getMenuInflater().inflate(R.menu.options_menu, menu);
-//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 1, 0, "原始");
-//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 2, 0, "黑白");
-//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 3, 0, "反光");
-//		menu.add(Menu.CATEGORY_ALTERNATIVE, Menu.FIRST + 4, 0, "Sephia");
-//		menu.add(Menu.CATEGORY_CONTAINER, Menu.FIRST + 5, 0, "延拍");
-//		menu.add(Menu.NONE, Menu.FIRST + 6, 0, "退出");
-		MenuInflater inflater=new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu, menu);
+		
+		MenuInflater inflater = new MenuInflater(getApplicationContext());
+		inflater.inflate(R.menu.home_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -170,6 +173,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			}
 
 			camera.startPreview();
+		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -241,6 +245,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 			// TODO Auto-generated method stub
 			String picpath = (String) v.getTag();
 			Intent intent = new Intent();
+
 			intent.putExtra("picpath", picpath);
 			intent.setClass(MainActivity.this, Picture.class);
 			startActivity(intent);
@@ -298,6 +303,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
 			camera.autoFocus(autofocus);
+			
+		
 		}
 	};
 

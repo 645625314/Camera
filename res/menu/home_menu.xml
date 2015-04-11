@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+      
+      
+            <item 
+                android:id="@+id/mode"
+                android:showAsAction="always"
+                        android:title="模式" >"
+                <!-- mode的二级目录 -->
+                <menu>
+		            <item
+		                android:id="@+id/original"
+		                android:showAsAction="always"
+		                android:title="原始" />"
+
+		            <item 
+		                android:id="@+id/black_white"
+		                android:showAsAction="always"
+		                      android:title="黑白"/>
+		              <item 
+		                android:id="@+id/nagative"
+		                android:showAsAction="always"
+		                android:title="反转"/>
+		                <item 
+		                android:id="@+id/Sephia"
+		                android:showAsAction="always"
+		                
+		                android:title="Sephia"/>
+                </menu>
+            </item>
+            
+            
+            <item
+                android:id="@+id/delay_take"
+                android:showAsAction="always"
+                android:title="延拍"
+                />
+                          <item
+                android:id="@+id/exit"
+                android:showAsAction="always"
+                android:title="退出"
+                />
+     
+    
+
+</menu>

@@ -9,14 +9,20 @@
     android:layout_height="match_parent"
     android:scaleType="matrix"
     android:contentDescription="@string/pic"
-    android:gravity="center" 
+    
      />
     <ZoomControls android:id="@+id/zoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"/>
-
+        android:layout_marginTop="20dp"/>
+   <ImageButton    
+       android:id="@+id/finger_control"
+       android:layout_width="35dp"
+        android:layout_height="42dp"
+        android:layout_alignParentLeft="true"
+        android:contentDescription="照片"
+        android:background="@drawable/lock"/>
  
 
-</RelativeLayout>
+</RelativeLayout >
