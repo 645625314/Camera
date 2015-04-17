@@ -17,6 +17,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -25,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -41,7 +43,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
-	Camera camera;
+	public Camera camera;
 	Picture picture;
 	int mCurrentOrientation;
 	Camera.Parameters parameters;
@@ -50,7 +52,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 	TextView countdown;
 	int currentTime = 10;
 	boolean isclicked = false;
-	String imagefilepath = "/sdcard/Pictures/";
+	public String imagefilepath = "/sdcard/Pictures/";
 	
 	private Handler timerUpdateHandler;
 	private boolean timerRunning = false;
@@ -123,7 +125,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 				timerRunning = true;
 				timerUpdateHandler.post(timerUpdateTask);
 			}
-		
+		     break;
 		case R.id.exit:
 			finish();
 			break;
@@ -276,9 +278,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		public void onAutoFocus(boolean success, Camera camera) {
 			// TODO Auto-generated method stub
 			if (success) {
-				parameters = camera.getParameters();
-				parameters.setPictureFormat(PixelFormat.JPEG);
-				camera.setParameters(parameters);
+//				parameters = camera.getParameters();
+//				parameters.setPictureFormat(PixelFormat.JPEG);
+//				camera.setParameters(parameters);
+				setCameraParameters();//手动设置预览分辨率和图片分辨率
 
 			}
 		}
@@ -307,5 +310,44 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 		
 		}
 	};
-
+	private void setCameraParameters(){
+		Camera.Parameters parameters = camera.getParameters();
+		// 选择合适的预览尺寸   
+		
+		List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
+		Size cameraSize;
+	
+		if (sizeList.size()>0) {
+		
+			cameraSize=sizeList.get(12);//后置则1920*1080P
+			
+			//预览图片大小
+			parameters.setPreviewSize(cameraSize.width, cameraSize.height);
+			
+		}
+		//Toast.makeText(getContext(), "width"+parameters.getPreviewSize().width+parameters.getPreviewSize().height, Toast.LENGTH_SHORT).show();
+		//设置生成的图片大小
+		sizeList = parameters.getSupportedPictureSizes();
+		
+		if (sizeList.size()>0) {
+			 cameraSize=sizeList.get(0);
+			for (Size size : sizeList) {
+				//小于100W像素
+				if (size.width*size.height<100*10000) {
+					cameraSize=size;
+					break;
+				}
+			}
+			parameters.setPictureSize(cameraSize.width, cameraSize.height);
+		}
+		//设置图片格式
+		parameters.setPictureFormat(ImageFormat.JPEG);       
+		parameters.setJpegQuality(100);
+		parameters.setJpegThumbnailQuality(100);
+		//自动聚焦模式
+		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		camera.setParameters(parameters);
+	
+		
+	}
 }
